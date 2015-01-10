@@ -1,0 +1,20 @@
+task default => "fatpack";
+
+desc "fatpack!";
+task fatpack => [qw(extlib/lib/perl5/parent.pm extlib/lib/perl5/HTTP/Tiny.pm)] => sub {
+    sh "carton", "install";
+    sh "fatpack-simple", "--exclude", "Module::Build,CPAN::Meta", "hello.pl";
+    sh "/usr/bin/perl", "-wc", "hello.fatpack.pl"; # syntax check by system perl
+};
+
+file "extlib/lib/perl5/parent.pm" => sub {
+    sh qw(cpanm -nq --reinstall -Lextlib parent);
+};
+file "extlib/lib/perl5/HTTP/Tiny.pm" => sub {
+    sh qw(cpanm -nq --reinstall -Lextlib HTTP::Tiny);
+};
+
+desc "clean!";
+task clean => sub {
+    sh qw(rm -rf local extlib);
+};
